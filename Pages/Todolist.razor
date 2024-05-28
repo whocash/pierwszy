@@ -1,0 +1,145 @@
+﻿@page "/todolist"
+
+<div class="alert alert-info" role="alert">
+    <strong>Informacja:</strong> Kwiatki dostają swoje płatki, kiedy TASK jest Completed. W zależności od ilości TASK, tym szybciej bądź wolniej wszystkie się pojawiają.Max 8 płatków bo tak 
+</div>
+
+<div class="background-grad p-5 m-5">
+    <div class="alert alert-primary" role="alert">
+        <h3 class="text-center">Todo List</h3>
+    </div>
+
+    <div class="sunflower-container">
+        <!-- Sunflower -->
+        <div class="flower">
+            <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+                <!-- Stem -->
+                <line x1="75" y1="150" x2="75" y2="100" stroke="green" stroke-width="5" />
+                <!-- rysowanie -->
+                @for (int i = 0; i < GetNumberOfPetals(); i++)
+                {
+                    <path d="M75 75 Q 60 37.5, 37.5 37.5 Q 30 37.5, 30 50 Q 30 62.5, 37.5 75 Q 60 87.5, 75 87.5 Q 90 87.5, 102.5 75 Q 110 62.5, 102.5 50 Q 90 37.5, 75 37.5 Z" fill="yellow" transform="rotate(@(i * 360 / 8) 75 75)" />
+                }
+                <circle cx="75" cy="75" r="10" fill="brown" />
+            </svg>
+        </div>
+
+        <!-- wiecej Flowers -->
+        @{
+            for (int j = 0; j < 6; j++) // mod kwiatki
+            {
+                <div class="flower">
+                    <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Stem -->
+                        <line x1="75" y1="150" x2="75" y2="100" stroke="green" stroke-width="5" />
+                        <!-- rysowanie -->
+                        @for (int i = 0; i < GetNumberOfPetals(); i++)
+                        {
+                            <path d="M75 75 Q 60 37.5, 37.5 37.5 Q 30 37.5, 30 50 Q 30 62.5, 37.5 75 Q 60 87.5, 75 87.5 Q 90 87.5, 102.5 75 Q 110 62.5, 102.5 50 Q 90 37.5, 75 37.5 Z" fill="yellow" transform="rotate(@(i * 360 / 8) 75 75)" />
+                        }
+                        <circle cx="75" cy="75" r="10" fill="brown" />
+                    </svg>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="d-grid gap-2">
+        <input class="form-control form-control-lg" type="text" @bind="newTodoItem" />
+        <button class="btn btn-primary" @onclick="addTodoItem">Add</button>
+    </div>
+
+    <hr />
+
+    <ol class="list-group">
+        @foreach (var todoItem in todoList)
+        {
+            <li class="list-group-item @(todoItem.IsCompleted ? "completed" : "")">
+                <span>@todoItem.Text</span>
+                <button class="btn btn-danger btn-sm float-end" @onclick="(() => deleteTodoItem(todoItem))">
+                    <span class="oi oi-delete" />
+                </button>
+                <button class="btn btn-secondary btn-sm float-end" @onclick="(() => toggleCompletion(todoItem))">
+                    @if (todoItem.IsCompleted)
+                    {
+                        <span>Undo</span>
+                    }
+                    else
+                    {
+                        <span>Complete</span>
+                    }
+                </button>
+            </li>
+        }
+    </ol>
+</div>
+
+<style>
+    .background-grad {
+        background-color: #0093E9;
+        background-image: linear-gradient(160deg, #0093E9 0%, #80D0C7 100%);
+    }
+
+    .sunflower-container {
+        display: flex;
+        justify-content: space-between;
+        max-width: 800px; /* Adjust this value as needed */
+        margin: 0 auto;
+    }
+
+    .flower {
+        flex: 1;
+        margin: 20px; /* Adjust the margin as needed */
+    }
+
+    .completed {
+        text-decoration: line-through;
+    }
+
+    .sidebar {
+        background-image: linear-gradient(180deg, #027013, #93d080 70%) !important;
+    }
+</style>
+
+@code {
+    List<TodoItem> todoList = new List<TodoItem> { new TodoItem("Mow the lawn", false), new TodoItem("Go shopping", false) };
+    string newTodoItem = "";
+
+    int GetNumberOfPetals()
+    {
+        double completedPercentage = todoList.Count(item => item.IsCompleted) / (double)todoList.Count;
+        int numberOfPetals = (int)Math.Round(completedPercentage * 8);
+        return Math.Min(numberOfPetals, 8);
+    }
+
+    void addTodoItem()
+    {
+        if (!string.IsNullOrWhiteSpace(newTodoItem))
+        {
+            todoList.Add(new TodoItem(newTodoItem, false));
+            newTodoItem = "";
+        }
+    }
+
+    void deleteTodoItem(TodoItem todoItemToDelete)
+    {
+        todoList.Remove(todoItemToDelete);
+    }
+
+    void toggleCompletion(TodoItem todoItem)
+    {
+        todoItem.IsCompleted = !todoItem.IsCompleted;
+    }
+
+    public class TodoItem
+    {
+        public string Text { get; set; }
+        public bool IsCompleted { get; set; }
+
+        public TodoItem(string text, bool isCompleted)
+        {
+            Text = text;
+            IsCompleted = isCompleted;
+        }
+    }
+}
